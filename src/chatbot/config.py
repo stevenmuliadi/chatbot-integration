@@ -37,8 +37,8 @@ class Settings:
     whatsapp_access_token: str
     whatsapp_phone_number_id: str
     webhook_verify_token: str
-    api_version: str = "v18.0"
-    openai_api_key: Optional[str] = None
+    api_version: str = "v22.0"
+    # openai_api_key: Optional[str] = None
     port: int = 5000
     host: str = "0.0.0.0"
 
@@ -73,8 +73,8 @@ class Settings:
             whatsapp_access_token=os.environ["WHATSAPP_ACCESS_TOKEN"],
             whatsapp_phone_number_id=os.environ["WHATSAPP_PHONE_NUMBER_ID"],
             webhook_verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"],
-            api_version=os.getenv("WHATSAPP_API_VERSION", "v18.0"),
-            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            api_version=os.getenv("WHATSAPP_API_VERSION", "v22.0"),
+            # openai_api_key=os.getenv("OPENAI_API_KEY"),
             port=int(os.getenv("PORT", "5000")),
             host=os.getenv("HOST", "0.0.0.0"),
         )

@@ -83,7 +83,7 @@ The core bot logic lives in `src/chatbot/chat_logic.py`. Replace the rule-based 
 
 ```
 .
-├── manage.py             # Entrypoint for running the Flask development server
+├── main.py             # Entrypoint for running the Flask development server
 ├── requirements.txt      # Python dependencies
 ├── src/chatbot           # Chatbot package
 │   ├── __init__.py
