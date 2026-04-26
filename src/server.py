@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, Blueprint, request, abort
+from flask import Flask, Blueprint, request, abort, current_app
 from .config import Settings
 
 log = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def verify_webhook():
     token = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
 
-    if mode == "subscribe" and token == Settings.webhook_verify_token:
+    if mode == "subscribe" and token == current_app.config["settings"].webhook_verify_token:
         log.info("Webhook verified successfully.")
         return challenge, 200
     
