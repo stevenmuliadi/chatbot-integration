@@ -5,13 +5,12 @@ from .config import Settings
 log = logging.getLogger(__name__)
 webhook_bp = Blueprint("webhook", __name__)
 
-def create_app():
+def create_app(settings: Settings | None = None):
     app = Flask(__name__)
-    configuration = Settings.from_env()
+    app.config["settings"] = settings or Settings.from_env()
 
     logging.basicConfig(level=logging.INFO)
 
-    # Register blueprints
     app.register_blueprint(webhook_bp)
 
     @app.route("/health")
