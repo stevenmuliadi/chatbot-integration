@@ -29,7 +29,7 @@ def verify_webhook():
 
     if mode == "subscribe" and token == current_app.config["settings"].webhook_verify_token:
         log.info("Webhook verified successfully.")
-        return challenge, 200
+        return challenge, 200, {"Content-Type": "text/plain"}
     
     log.warning("Verification failed — token mismatch")
     abort(403)
