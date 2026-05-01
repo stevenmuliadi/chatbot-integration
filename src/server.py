@@ -26,6 +26,7 @@ def verify_webhook():
     mode = request.args.get("hub.mode")
     token = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
+    expected = current_app.config["settings"].webhook_verify_token
 
     log.info("=== VERIFICATION ATTEMPT ===")
     log.info("mode received: %r", mode)
@@ -34,7 +35,7 @@ def verify_webhook():
     log.info("tokens match: %s", token == expected)
     log.info("user agent: %s", request.headers.get("User-Agent"))
 
-    if mode == "subscribe" and token == current_app.config["settings"].webhook_verify_token:
+    if mode == "subscribe" and token == expected:
         log.info("Webhook verified successfully.")
         return Response(challenge, status=200, mimetype="text/plain")
     
