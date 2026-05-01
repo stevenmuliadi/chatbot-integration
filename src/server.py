@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, Blueprint, request, abort, current_app
+from flask import Flask, Blueprint, request, abort, current_app, Response
 from .config import Settings
 
 log = logging.getLogger(__name__)
@@ -27,9 +27,16 @@ def verify_webhook():
     token = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
 
+    log.info("=== VERIFICATION ATTEMPT ===")
+    log.info("mode received: %r", mode)
+    log.info("token received: %r (len=%d)", token, len(token) if token else 0)
+    log.info("token expected: %r (len=%d)", expected, len(expected) if expected else 0)
+    log.info("tokens match: %s", token == expected)
+    log.info("user agent: %s", request.headers.get("User-Agent"))
+
     if mode == "subscribe" and token == current_app.config["settings"].webhook_verify_token:
         log.info("Webhook verified successfully.")
-        return challenge, 200, {"Content-Type": "text/plain"}
+        return Response(challenge, status=200, mimetype="text/plain")
     
     log.warning("Verification failed — token mismatch")
     abort(403)
