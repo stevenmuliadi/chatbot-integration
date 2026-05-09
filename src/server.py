@@ -1,9 +1,9 @@
-import logging
+import logging, hashlib, hmac
 from flask import Flask, Blueprint, request, abort, current_app, Response
 from .config import Settings
 
-log = logging.getLogger(__name__)
 webhook_bp = Blueprint("webhook", __name__)
+log = logging.getLogger(__name__)
 
 def create_app(settings: Settings | None = None):
     app = Flask(__name__)
@@ -21,7 +21,7 @@ def create_app(settings: Settings | None = None):
 
 # ── GET /webhook ────────────────────────────────────────────
 # Meta calls this ONCE during initial setup.
-@webhook_bp.route("/webhook", methods=["GET"])
+@webhook_bp.get("/webhook")
 def verify_webhook():
     mode = request.args.get("hub.mode")
     token = request.args.get("hub.verify_token")
@@ -44,9 +44,21 @@ def verify_webhook():
 
 # ── POST /webhook ───────────────────────────────────────────
 # Meta calls this for EVERY incoming message.
-@webhook_bp.route("/webhook", methods=["POST"])
+@webhook_bp.post("/webhook")
 def receive_webhook():
     try:
+        signature = request.headers.get("X-Hub-Signature-256", "")
+        if not signature.startswith("sha256="):
+            abort(401)
+
+        expected = "sha256=" + hmac.new(
+            current_app.config["settings"].meta_app_secret.encode(), request.get_data(), hashlib.sha256
+        ).hexdigest()
+
+        if not hmac.compare_digest(expected, signature):
+            log.warning("Invalid webhook signature")
+            abort(401)
+        
         body = request.get_json(silent=True) or {}
         log.info("Event received: %s", body)
 

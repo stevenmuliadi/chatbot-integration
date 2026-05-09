@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import os
-from typing import Optional
 
 
 @dataclass
@@ -24,10 +23,9 @@ class Settings:
         Meta. The same value must be configured in the Meta developer console.
     api_version:
         Version of the WhatsApp Cloud API endpoints to use.
-    openai_api_key:
-        Optional OpenAI key used when the bot relies on the OpenAI API. The
-        sample bot included in this repository does not use it but the field is
-        provided for extensibility.
+    meta_app_secret:
+        App secret from Meta developer console, used to verify incoming webhook
+        signatures.
     port:
         Port on which the Flask development server should run.
     host:
@@ -37,10 +35,10 @@ class Settings:
     whatsapp_access_token: str
     whatsapp_phone_number_id: str
     webhook_verify_token: str
+    meta_app_secret: str
     api_version: str = "v22.0"
-    # openai_api_key: Optional[str] = None
     port: int = 5000
-    host: str = "0.0.0.0"
+    host: str = "localhost"
 
     @property
     def graph_api_base(self) -> str:
@@ -62,6 +60,7 @@ class Settings:
             "WHATSAPP_ACCESS_TOKEN",
             "WHATSAPP_PHONE_NUMBER_ID",
             "WHATSAPP_VERIFY_TOKEN",
+            "META_APP_SECRET",
         )
         missing = [var for var in required_vars if not os.getenv(var)]
         if missing:
@@ -74,7 +73,7 @@ class Settings:
             whatsapp_phone_number_id=os.environ["WHATSAPP_PHONE_NUMBER_ID"],
             webhook_verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"],
             api_version=os.getenv("WHATSAPP_API_VERSION", "v22.0"),
-            # openai_api_key=os.getenv("OPENAI_API_KEY"),
+            meta_app_secret=os.environ["META_APP_SECRET"],
             port=int(os.getenv("PORT", "5000")),
             host=os.getenv("HOST", "0.0.0.0"),
         )
