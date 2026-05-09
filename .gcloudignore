@@ -1,0 +1,14 @@
+.git/
+.gitignore
+.gcloudignore
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.env.*
+.claude/
+.qodo/
+.vercel/
+README.md
+LICENSE
