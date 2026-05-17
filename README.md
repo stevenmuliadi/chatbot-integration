@@ -99,4 +99,12 @@ The core bot logic lives in `src/chatbot/chat_logic.py`. Replace the rule-based 
 - Deploy the Flask application to a cloud service (e.g., Render, Railway, AWS Lambda via Zappa) and update the webhook URL in the Meta developer console.
 - Add persistence to store conversation history or user profiles.
 
-Feel free to fork this repository and adapt it to your needs!
+## License and Usage Permission
+
+Copyright (c) 2026 Steven Muliadi. **All rights reserved.**
+
+This repository is released under a [proprietary license](LICENSE). It is **not** open source.
+
+**Permission required before any use.** You may not fork, copy, modify, redistribute, sublicense, host, or otherwise use this repository or any of its contents — in whole or in part — without obtaining prior written permission from the copyright holder. To request permission, please open an issue or contact the maintainer through this repository's GitHub page.
+
+Unauthorized forks, copies, or derivative works are strictly prohibited. Viewing this repository on GitHub does not grant any license or right to use the code.
