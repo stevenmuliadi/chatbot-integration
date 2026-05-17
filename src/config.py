@@ -1,5 +1,3 @@
-"""Configuration helpers for the WhatsApp chatbot application."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -26,6 +24,10 @@ class Settings:
     meta_app_secret:
         App secret from Meta developer console, used to verify incoming webhook
         signatures.
+    gemini_api_key:
+        API key for authenticating with the Google Gemini API.
+    gemini_model:
+        Name of the Gemini model to use for generating chatbot replies.
     port:
         Port on which the Flask development server should run.
     host:
@@ -36,6 +38,8 @@ class Settings:
     whatsapp_phone_number_id: str
     webhook_verify_token: str
     meta_app_secret: str
+    gemini_api_key: str
+    gemini_model: str
     api_version: str = "v22.0"
     port: int = 5000
     host: str = "localhost"
@@ -61,19 +65,22 @@ class Settings:
             "WHATSAPP_PHONE_NUMBER_ID",
             "WHATSAPP_VERIFY_TOKEN",
             "META_APP_SECRET",
+            "GEMINI_API_KEY",
+            "GEMINI_MODEL",
         )
         missing = [var for var in required_vars if not os.getenv(var)]
         if missing:
             raise ValueError(
                 "Missing required environment variables: " + ", ".join(missing)
             )
-
         return cls(
-            whatsapp_access_token=os.environ["WHATSAPP_ACCESS_TOKEN"],
-            whatsapp_phone_number_id=os.environ["WHATSAPP_PHONE_NUMBER_ID"],
-            webhook_verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"],
-            api_version=os.getenv("WHATSAPP_API_VERSION", "v22.0"),
-            meta_app_secret=os.environ["META_APP_SECRET"],
+            whatsapp_access_token=os.environ["WHATSAPP_ACCESS_TOKEN"].strip(),
+            whatsapp_phone_number_id=os.environ["WHATSAPP_PHONE_NUMBER_ID"].strip(),
+            webhook_verify_token=os.environ["WHATSAPP_VERIFY_TOKEN"].strip(),
+            api_version=os.getenv("WHATSAPP_API_VERSION", "v22.0").strip(),
+            meta_app_secret=os.environ["META_APP_SECRET"].strip(),
+            gemini_api_key=os.environ["GEMINI_API_KEY"].strip(),
+            gemini_model=os.environ["GEMINI_MODEL"].strip(),
             port=int(os.getenv("PORT", "5000")),
-            host=os.getenv("HOST", "0.0.0.0"),
+            host=os.getenv("HOST", "0.0.0.0").strip(),
         )
