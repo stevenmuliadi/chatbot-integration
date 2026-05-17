@@ -1,62 +1,61 @@
-"""Simple rule-based chatbot logic for WhatsApp integration."""
-
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Dict
+import logging
+from dataclasses import dataclass, field
+
+from google import genai
+from google.genai import types
+
+log = logging.getLogger(__name__)
+
+
+DEFAULT_SYSTEM_PROMPT = (
+    "You are HelperBot, a friendly assistant replying on WhatsApp. "
+    "Keep replies short and conversational — typically 1–3 sentences, "
+    "occasionally longer when explaining something. Use plain text only "
+    "(no markdown, no code blocks, no bullet symbols beyond simple dashes). "
+    "If you don't know something, say so honestly."
+)
 
 
 @dataclass
 class ChatBot:
-    """A minimal rule-based chatbot.
+    """Gemini-backed chatbot.
 
-    This implementation is intentionally lightweight so the repository remains
-    easy to understand. It demonstrates where to integrate more sophisticated
-    natural language processing logic such as calls to large language models or
-    retrieval augmented generation services.
+    A single instance is created per Flask app and reused across requests.
+    The Gemini SDK client is thread-safe, so this is safe under gunicorn
+    with multiple threads.
     """
 
-    name: str = "HelperBot"
+    api_key: str
+    model: str = "gemini-2.5-flash"
+    system_prompt: str = DEFAULT_SYSTEM_PROMPT
+    _client: genai.Client = field(init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._client = genai.Client(api_key=self.api_key)
 
     def reply(self, message: str) -> str:
-        """Generate a reply for an incoming WhatsApp message."""
+        """Generate an AI reply for an incoming WhatsApp message."""
+        message = (message or "").strip()
+        if not message:
+            return "Hi! I didn't catch anything. Please send a message so I can help."
 
-        normalized = message.strip().lower()
-        if not normalized:
-            return (
-                "Hi! I didn't catch anything. Please send a message so I can "
-                "assist you."
+        try:
+            response = self._client.models.generate_content(
+                model=self.model,
+                contents=message,
+                config=types.GenerateContentConfig(
+                    system_instruction=self.system_prompt,
+                    max_output_tokens=512,
+                    temperature=0.7,
+                ),
             )
-
-        if any(word in normalized for word in {"hello", "hi", "hey"}):
-            return "Hello! I'm here to help you with the WhatsApp integration demo."
-
-        if "help" in normalized:
-            return (
-                "You can ask me about the project setup, how to configure the "
-                "Twilio sandbox, or say 'menu' to see available commands."
-            )
-
-        commands: Dict[str, str] = {
-            "menu": (
-                "Available commands:\n"
-                "- menu: show this help menu\n"
-                "- time: ask for the current time\n"
-                "- about: learn about this chatbot"
-            ),
-            "time": f"The current server time is {datetime.utcnow():%Y-%m-%d %H:%M:%S} UTC.",
-            "about": (
-                "I'm a demo chatbot running on Flask and Twilio's WhatsApp API. "
-                "Feel free to customise me with your own logic!"
-            ),
-        }
-
-        for keyword, response in commands.items():
-            if keyword in normalized:
-                return response
-
-        return (
-            "I'm not sure how to respond to that yet. Type 'help' to see what I "
-            "can do."
-        )
+            text = (response.text or "").strip()
+            if not text:
+                log.warning("Gemini returned empty response for input: %r", message)
+                return "Sorry, I couldn't come up with a reply. Try rephrasing?"
+            return text
+        except Exception as exc:
+            log.exception("Gemini API call failed: %s", exc)
+            return "Sorry, I'm having trouble thinking right now. Please try again in a moment."
